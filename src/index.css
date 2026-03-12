@@ -4,9 +4,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Open Sans', sans-serif;
-  background-color: #0F1923;
-  color: #F0F4F8;
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #F1F6FA;
+  color: #3F454D;
   -webkit-font-smoothing: antialiased;
 }
 
