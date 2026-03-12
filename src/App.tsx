@@ -1,425 +1,365 @@
+import { useEffect, useRef } from 'react'
 import './index.css'
+
+function useScrollAnimate() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { el.classList.add('domo-animate'); observer.unobserve(el) } },
+      { threshold: 0.15 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  return ref
+}
+
+function Section({ id, bg, children }: { id?: string; bg: 'white' | 'light'; children: React.ReactNode }) {
+  return (
+    <section id={id} className="px-6" style={{ background: bg === 'white' ? '#FFFFFF' : 'var(--neutral-50)', padding: '6rem 1.5rem' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>{children}</div>
+    </section>
+  )
+}
+
+function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+  const ref = useScrollAnimate()
+  return (
+    <div ref={ref} style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+      <h2 style={{ color: 'var(--neutral-900)', marginBottom: subtitle ? '0.75rem' : 0 }}>{title}</h2>
+      {subtitle && <p style={{ color: 'var(--neutral-600)', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>{subtitle}</p>}
+    </div>
+  )
+}
 
 function IMessageBubble({ text, isMe }: { text: string; isMe: boolean }) {
   return (
-    <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`max-w-[85%] px-4 py-3 text-sm leading-relaxed whitespace-pre-line ${
-          isMe
-            ? 'bg-[#007AFF] text-white rounded-[18px] rounded-br-[4px]'
-            : 'bg-[#E9E9EB] text-[#3F454D] rounded-[18px] rounded-bl-[4px]'
-        }`}
-      >
-        {text}
-      </div>
+    <div style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+      <div style={{
+        maxWidth: '85%', padding: '10px 14px', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-line',
+        background: isMe ? '#007AFF' : '#E9E9EB', color: isMe ? '#fff' : 'var(--neutral-900)',
+        borderRadius: 18, ...(isMe ? { borderBottomRightRadius: 4 } : { borderBottomLeftRadius: 4 }),
+      }}>{text}</div>
     </div>
   )
 }
 
 function App() {
   return (
-    <div className="min-h-screen bg-[#F1F6FA]" style={{ fontFamily: "'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-[#DCE4EA]">
-        <div className="max-w-[1100px] mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[8px] flex items-center justify-center bg-[#99CCEE]">
-              <span className="text-white font-bold text-sm">CC</span>
+    <div>
+      {/* ───── NAV ───── */}
+      <nav style={{
+        position: 'fixed', top: 0, width: '100%', zIndex: 50,
+        background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--neutral-100)',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0.875rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 8, background: 'var(--domo-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#fff', fontWeight: 700, fontSize: 13 }}>CC</span>
             </div>
-            <span className="font-bold text-[#3F454D] text-[15px]">Claude Code x iMessage</span>
+            <span style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 15 }}>Claude Code x iMessage</span>
           </div>
-          <div className="hidden md:flex gap-8 text-[13px] font-semibold text-[#68737F]">
-            <a href="#how-it-works" className="hover:text-[#3F454D] transition-colors duration-300">How It Works</a>
-            <a href="#features" className="hover:text-[#3F454D] transition-colors duration-300">Features</a>
-            <a href="#heartbeat" className="hover:text-[#3F454D] transition-colors duration-300">Heartbeat</a>
-            <a href="#comparison" className="hover:text-[#3F454D] transition-colors duration-300">vs OpenClaw</a>
+          <div style={{ display: 'flex', gap: 28, fontSize: 13, fontWeight: 600 }}>
+            {['How It Works', 'Features', 'Heartbeat', 'vs OpenClaw'].map(label => (
+              <a key={label} href={`#${label.toLowerCase().replace(/\s/g, '-').replace('vs-', '')}`}
+                style={{ color: 'var(--neutral-600)', textDecoration: 'none', transition: 'color 0.3s' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--neutral-900)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--neutral-600)')}
+              >{label}</a>
+            ))}
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="pt-28 pb-24 px-6 bg-gradient-to-b from-white to-[#F1F6FA]">
-        <div className="max-w-[1100px] mx-auto text-center">
-          <div className="inline-block px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest mb-8 bg-[#FF9922]/10 text-[#FF9922] border border-[#FF9922]/20">
-            ARCHITECTURE OVERVIEW
+      {/* ───── HERO (Domo Blue background) ───── */}
+      <section style={{
+        background: 'linear-gradient(180deg, #99CCEE 0%, #7BB8E0 100%)',
+        padding: '8rem 1.5rem 5rem', position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.015, background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center', position: 'relative' }}>
+          <div className="domo-animate">
+            <div style={{ display: 'inline-block', padding: '6px 14px', borderRadius: 20, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', marginBottom: 24, background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
+              ARCHITECTURE OVERVIEW
+            </div>
+            <h1 style={{ color: '#fff', fontWeight: 800, marginBottom: 20 }}>
+              Control Claude Code<br />from your iPhone
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 'clamp(1rem,1.5vw,1.15rem)', lineHeight: 1.7, fontWeight: 300, marginBottom: 32, maxWidth: 480 }}>
+              An always-on AI agent you text via iMessage. Full Claude Code capabilities — file editing, MCP servers, git, bash, deploys — triggered from a text message.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <a href="#how-it-works" className="domo-btn-primary">See How It Works</a>
+              <a href="#openclaw" className="domo-btn-secondary" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}>vs OpenClaw</a>
+            </div>
           </div>
-          <h1 className="text-[clamp(2rem,5vw,3.5rem)] font-bold text-[#3F454D] leading-[1.15] mb-6 tracking-[-0.01em]">
-            Control <span className="text-[#99CCEE]">Claude Code</span><br />
-            from your <span className="text-[#FF9922]">iPhone</span>
-          </h1>
-          <p className="text-[clamp(0.95rem,1.5vw,1.15rem)] text-[#68737F] leading-relaxed max-w-[640px] mx-auto mb-10 font-light">
-            An always-on AI agent you text via iMessage. Full Claude Code capabilities —
-            file editing, MCP servers, git, bash, deploys — triggered from a text message.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3 mb-14">
-            {['Linq API', 'Claude Code CLI', 'Cloudflared Tunnel', 'Mac Mini'].map(tag => (
-              <span key={tag} className="px-4 py-2 rounded-[8px] text-[12px] font-semibold bg-white text-[#3F454D] border border-[#DCE4EA] shadow-[0_1px_3px_rgba(63,69,77,0.08)]">
-                {tag}
-              </span>
-            ))}
-          </div>
-          <div className="max-w-[800px] mx-auto">
-            <img
-              src="./images/hero.png"
-              alt="iMessage Claude Code Agent"
-              className="w-full rounded-[12px] shadow-[0_8px_20px_rgba(63,69,77,0.08),0_4px_8px_rgba(63,69,77,0.04)] border border-[#DCE4EA]"
-            />
+          <div className="domo-animate domo-delay-2">
+            <img src="./images/hero.png" alt="iMessage Claude Code Agent" style={{ width: '100%', borderRadius: 12, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }} />
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="py-24 px-6 bg-white">
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold text-[#3F454D] mb-4 tracking-[-0.01em]">How It Works</h2>
-            <p className="text-[#68737F] max-w-[560px] mx-auto leading-relaxed">
-              A Flask server on your Mac receives iMessage webhooks via Linq, runs Claude Code in headless mode, and sends the response back.
-            </p>
-          </div>
-
-          <div className="max-w-[800px] mx-auto mb-16">
-            <img
-              src="./images/architecture.png"
-              alt="Architecture Diagram"
-              className="w-full rounded-[12px] shadow-[0_4px_12px_rgba(63,69,77,0.1)] border border-[#DCE4EA]"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { step: '1', title: 'You Text', desc: 'Send an iMessage to your Linq phone number from anywhere.' },
-              { step: '2', title: 'Webhook Fires', desc: 'Linq sends a webhook to your Mac via cloudflared tunnel.' },
-              { step: '3', title: 'Claude Code Runs', desc: 'Flask triggers claude -p with full tool access. No prompts.' },
-              { step: '4', title: 'Reply via iMessage', desc: 'Output sent back through Linq API as an iMessage reply.' },
-            ].map(({ step, title, desc }) => (
-              <div key={step} className="text-center">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-[16px] font-bold mx-auto mb-4 bg-[#99CCEE] text-white shadow-[0_4px_20px_rgba(153,204,238,0.3)]">
-                  {step}
-                </div>
-                <h3 className="font-bold text-[#3F454D] text-[15px] mb-2">{title}</h3>
-                <p className="text-[13px] text-[#68737F] leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
+      {/* ───── HOW IT WORKS ───── */}
+      <Section id="how-it-works" bg="white">
+        <SectionHeader title="How It Works" subtitle="A Flask server on your Mac receives iMessage webhooks via Linq, runs Claude Code in headless mode, and sends the response back." />
+        <div style={{ maxWidth: 800, margin: '0 auto 3rem' }}>
+          <img src="./images/architecture.png" alt="Architecture" style={{ width: '100%', borderRadius: 12, border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)' }} />
         </div>
-      </section>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }}>
+          {[
+            { n: '1', t: 'You Text', d: 'Send an iMessage to your Linq phone number from anywhere.' },
+            { n: '2', t: 'Webhook Fires', d: 'Linq sends a webhook to your Mac via cloudflared tunnel.' },
+            { n: '3', t: 'Claude Code Runs', d: 'Flask triggers claude -p with full tool access. No prompts.' },
+            { n: '4', t: 'Reply via iMessage', d: 'Output sent back through Linq API as an iMessage reply.' },
+          ].map(({ n, t, d }) => {
+            const ref = useScrollAnimate()
+            return (
+              <div ref={ref} key={n} className={`domo-delay-${n}`} style={{ textAlign: 'center' }}>
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--domo-blue)', color: '#fff', fontWeight: 700, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: 'var(--shadow-blue-glow)' }}>{n}</div>
+                <h4 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 15, marginBottom: 8 }}>{t}</h4>
+                <p style={{ fontSize: 13, color: 'var(--neutral-600)', lineHeight: 1.6 }}>{d}</p>
+              </div>
+            )
+          })}
+        </div>
+      </Section>
 
-      {/* The Key Insight */}
-      <section className="py-24 px-6 bg-[#F1F6FA]">
-        <div className="max-w-[720px] mx-auto">
-          <div className="bg-white rounded-[12px] p-10 border border-[#DCE4EA] shadow-[0_4px_12px_rgba(63,69,77,0.1)]">
-            <div className="text-[11px] font-bold tracking-widest text-[#FF9922] mb-5">THE KEY INSIGHT</div>
-            <h2 className="text-[clamp(1.25rem,2.5vw,1.75rem)] font-light text-[#3F454D] mb-6 leading-snug">
-              <code className="font-mono font-bold text-[#99CCEE]">claude -p --dangerously-skip-permissions</code>
-            </h2>
-            <p className="text-[#68737F] leading-relaxed mb-8">
-              Claude Code's headless mode runs the full CLI non-interactively — same CLAUDE.md, same MCP servers,
-              same memory, same tools. Combined with the skip-permissions flag, it runs fully autonomous.
-              This is what makes phone-controlled Claude Code possible.
+      {/* ───── KEY INSIGHT ───── */}
+      <Section bg="light">
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <div className="domo-card" style={{ padding: '2.5rem', borderLeft: '4px solid var(--accent-orange)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--accent-orange)', marginBottom: 16 }}>THE KEY INSIGHT</div>
+            <h3 style={{ fontWeight: 700, color: 'var(--neutral-900)', marginBottom: 16 }}>
+              <code style={{ fontFamily: 'monospace', color: 'var(--domo-blue)' }}>claude -p --dangerously-skip-permissions</code>
+            </h3>
+            <p style={{ color: 'var(--neutral-600)', lineHeight: 1.7, marginBottom: 24 }}>
+              Claude Code's headless mode runs the full CLI non-interactively — same CLAUDE.md, same MCP servers, same memory, same tools. Combined with the skip-permissions flag, it runs fully autonomous. This is what makes phone-controlled Claude Code possible.
             </p>
-            <div className="bg-[#3F454D] rounded-[8px] p-5 font-mono text-[13px] leading-relaxed">
-              <div className="text-[#B7C1CB]"># What your Flask server runs when you text:</div>
-              <div className="mt-3 text-white">
-                claude <span className="text-[#99CCEE]">-p</span> <span className="text-[#ADD4C1]">"deploy the knowledge graph"</span> \
-              </div>
-              <div className="text-white pl-4">
-                <span className="text-[#FF9922]">--dangerously-skip-permissions</span> \
-              </div>
-              <div className="text-white pl-4">
-                --output-format <span className="text-[#ADD4C1]">text</span> \
-              </div>
-              <div className="text-white pl-4">
-                --max-turns <span className="text-[#FF9922]">25</span>
-              </div>
+            <div style={{ background: 'var(--neutral-900)', borderRadius: 8, padding: '1.25rem', fontFamily: 'monospace', fontSize: 13, lineHeight: 1.8 }}>
+              <div style={{ color: 'var(--neutral-200)' }}># What your Flask server runs:</div>
+              <div style={{ color: '#fff', marginTop: 8 }}>claude <span style={{ color: 'var(--domo-blue)' }}>-p</span> <span style={{ color: 'var(--accent-mint)' }}>"deploy the knowledge graph"</span> \</div>
+              <div style={{ color: '#fff', paddingLeft: 16 }}><span style={{ color: 'var(--accent-orange)' }}>--dangerously-skip-permissions</span> \</div>
+              <div style={{ color: '#fff', paddingLeft: 16 }}>--output-format <span style={{ color: 'var(--accent-mint)' }}>text</span> --max-turns <span style={{ color: 'var(--accent-orange)' }}>25</span></div>
             </div>
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* iMessage Demo */}
-      <section className="py-24 px-6 bg-white">
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold text-[#3F454D] mb-4">What It Looks Like</h2>
-            <p className="text-[#68737F]">Real interactions — text a command, get results in seconds.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-[900px] mx-auto">
-            {[
-              {
-                label: 'HEALTH CHECK',
-                msgs: [
-                  { text: 'check kg health', isMe: true },
-                  { text: 'KG API Status:\n/api/products — 142ms\n/api/industries — 89ms\n/api/messaging — 203ms\n/api/documents/search — 312ms\nAll 7 endpoints healthy.', isMe: false },
-                ],
-              },
-              {
-                label: 'CODE EDITING',
-                msgs: [
-                  { text: 'fix the typo in clanker\'s prompt, change recieve to receive', isMe: true },
-                  { text: 'Fixed in clanker_5000/system_prompt.md\nChanged "recieve" → "receive" (2 occurrences)\nCommitted to branch fix/clanker-typo', isMe: false },
-                ],
-              },
-              {
-                label: 'DEPLOYMENT',
-                msgs: [
-                  { text: 'deploy the knowledge graph', isMe: true },
-                  { text: 'Starting KG deployment...\nBuilt container image\nDeployed to Cloud Run\nHealth check passed. All endpoints responding.', isMe: false },
-                ],
-              },
-              {
-                label: 'DATA QUERY',
-                msgs: [
-                  { text: 'what\'s pipeline revenue this week?', isMe: true },
-                  { text: 'Pipeline: $2.3M (up 12% WoW)\nNew opps: 14 (3 enterprise)\nTop deal: Acme Corp $420K (Stage 3)\nForecast: $1.8M weighted', isMe: false },
-                ],
-              },
-            ].map(({ label, msgs }) => (
-              <div key={label} className="bg-[#F1F6FA] rounded-[12px] p-6 border border-[#DCE4EA]">
-                <div className="text-[10px] font-bold tracking-widest text-[#B7C1CB] text-center mb-5">{label}</div>
-                <div className="space-y-3">
-                  {msgs.map((m, i) => (
-                    <IMessageBubble key={i} text={m.text} isMe={m.isMe} />
-                  ))}
+      {/* ───── IMESSAGE DEMOS ───── */}
+      <Section bg="white">
+        <SectionHeader title="What It Looks Like" subtitle="Real interactions — text a command, get results in seconds." />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24, maxWidth: 900, margin: '0 auto' }}>
+          {[
+            { label: 'HEALTH CHECK', msgs: [{ t: 'check kg health', me: true }, { t: 'KG API Status:\n/api/products — 142ms\n/api/industries — 89ms\n/api/messaging — 203ms\nAll 7 endpoints healthy.', me: false }] },
+            { label: 'CODE EDITING', msgs: [{ t: "fix the typo in clanker's prompt, change recieve to receive", me: true }, { t: 'Fixed in clanker_5000/system_prompt.md\nChanged "recieve" → "receive" (2 occurrences)\nCommitted to branch fix/clanker-typo', me: false }] },
+            { label: 'DEPLOYMENT', msgs: [{ t: 'deploy the knowledge graph', me: true }, { t: 'Starting KG deployment...\nBuilt container image\nDeployed to Cloud Run\nHealth check passed. All endpoints responding.', me: false }] },
+            { label: 'DATA QUERY', msgs: [{ t: "what's pipeline revenue this week?", me: true }, { t: 'Pipeline: $2.3M (up 12% WoW)\nNew opps: 14 (3 enterprise)\nTop deal: Acme Corp $420K (Stage 3)\nForecast: $1.8M weighted', me: false }] },
+          ].map(({ label, msgs }, idx) => {
+            const ref = useScrollAnimate()
+            return (
+              <div ref={ref} key={label} className={`domo-card domo-delay-${idx + 1}`} style={{ padding: '1.5rem' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--neutral-200)', textAlign: 'center', marginBottom: 16 }}>{label}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {msgs.map((m, i) => <IMessageBubble key={i} text={m.t} isMe={m.me} />)}
                 </div>
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
-      </section>
+      </Section>
 
-      {/* Features */}
-      <section id="features" className="py-24 px-6 bg-[#F1F6FA]">
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold text-[#3F454D] mb-4">Full Claude Code, From Your Pocket</h2>
-            <p className="text-[#68737F] max-w-[480px] mx-auto">Everything Claude Code can do on your laptop — accessible via a text message.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-[960px] mx-auto">
-            {[
-              { icon: '📁', title: 'File System Access', desc: 'Read, write, edit any file. Create projects, fix bugs, refactor code — all from iMessage.' },
-              { icon: '🔌', title: 'MCP Servers', desc: 'Domo, Neo4j Knowledge Graph, Figma, Playwright, Shadcn — all your MCP tools work.' },
-              { icon: '⚡', title: 'Git & Deploy', desc: 'Commit, push, deploy to Cloud Run, publish Domo apps. Full CI/CD from your phone.' },
-              { icon: '🧠', title: 'Persistent Memory', desc: 'Claude Code\'s memory system persists across sessions. Your agent remembers everything.' },
-              { icon: '🛠️', title: '40+ Slash Commands', desc: 'All your existing skills work: /check/kg-health, /content-intel, /session/status.' },
-              { icon: '🌐', title: 'Browser Automation', desc: 'Playwright MCP for screenshots, testing, and visual verification of builds.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="bg-white rounded-[12px] p-7 border border-[#DCE4EA] shadow-[0_1px_3px_rgba(63,69,77,0.08)] hover:shadow-[0_4px_12px_rgba(63,69,77,0.1)] transition-shadow duration-300">
-                <div className="text-3xl mb-4">{icon}</div>
-                <h3 className="font-bold text-[#3F454D] text-[15px] mb-2">{title}</h3>
-                <p className="text-[13px] text-[#68737F] leading-relaxed">{desc}</p>
+      {/* ───── FEATURES ───── */}
+      <Section id="features" bg="light">
+        <SectionHeader title="Full Claude Code, From Your Pocket" subtitle="Everything Claude Code can do on your laptop — accessible via a text message." />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 960, margin: '0 auto' }}>
+          {[
+            { icon: '📁', title: 'File System Access', desc: 'Read, write, edit any file. Create projects, fix bugs, refactor code — all from iMessage.' },
+            { icon: '🔌', title: 'MCP Servers', desc: 'Domo, Neo4j Knowledge Graph, Figma, Playwright, Shadcn — all your MCP tools work.' },
+            { icon: '⚡', title: 'Git & Deploy', desc: 'Commit, push, deploy to Cloud Run, publish Domo apps. Full CI/CD from your phone.' },
+            { icon: '🧠', title: 'Persistent Memory', desc: "Claude Code's memory persists across sessions. Your agent remembers everything." },
+            { icon: '🛠️', title: '40+ Slash Commands', desc: 'All existing skills work: /check/kg-health, /content-intel, /session/status.' },
+            { icon: '🌐', title: 'Browser Automation', desc: 'Playwright MCP for screenshots, testing, and visual verification of builds.' },
+          ].map(({ icon, title, desc }, idx) => {
+            const ref = useScrollAnimate()
+            return (
+              <div ref={ref} key={title} className={`domo-card domo-delay-${idx + 1}`}>
+                <div style={{ fontSize: 28, marginBottom: 12 }}>{icon}</div>
+                <h4 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 15, marginBottom: 8 }}>{title}</h4>
+                <p style={{ fontSize: 13, color: 'var(--neutral-600)', lineHeight: 1.65 }}>{desc}</p>
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
-      </section>
+      </Section>
 
-      {/* Heartbeat System */}
-      <section id="heartbeat" className="py-24 px-6 bg-white">
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold text-[#3F454D] mb-4">Proactive, Not Just Reactive</h2>
-            <p className="text-[#68737F] max-w-[520px] mx-auto">
-              Your agent monitors your infrastructure and texts YOU when something needs attention.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-10 max-w-[960px] mx-auto items-start">
-            {/* Left: Image + Morning Briefing */}
-            <div>
-              <img src="./images/heartbeat.png" alt="Heartbeat Monitoring" className="w-full rounded-[12px] border border-[#DCE4EA] shadow-[0_4px_12px_rgba(63,69,77,0.1)] mb-8" />
-              <div className="bg-[#F1F6FA] rounded-[12px] p-6 border border-[#DCE4EA]">
-                <div className="text-[10px] font-bold tracking-widest text-[#B7C1CB] text-center mb-4">MORNING BRIEFING — 7:00 AM</div>
-                <div className="space-y-3">
-                  <IMessageBubble text={"Morning check-in:\n— All services healthy\n— 3 commits pushed yesterday\n— Weekly exec report ran successfully\n— 1 pending task: \"build Linq app\"\nHave a great Tuesday."} isMe={false} />
-                  <IMessageBubble text="run the pending task" isMe={true} />
-                  <IMessageBubble text="On it. Starting build now..." isMe={false} />
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Schedule + Reactions */}
-            <div>
-              <h3 className="font-bold text-[#3F454D] text-[17px] mb-5">Scheduled Behaviors</h3>
-              <div className="bg-[#F1F6FA] rounded-[12px] border border-[#DCE4EA] p-6 mb-8">
-                {[
-                  { time: '7:00 AM', job: 'Morning Briefing', desc: 'Overnight alerts, git activity, priorities' },
-                  { time: 'Every 30m', job: 'Health Heartbeat', desc: 'Check services. Alert only if issues.' },
-                  { time: '6:00 PM', job: 'EOD Summary', desc: 'Commits, deploys, issues resolved' },
-                  { time: 'Fri 4 PM', job: 'Weekly Digest', desc: 'Week highlights, deploys, KG changes' },
-                  { time: 'Midnight', job: 'Ralph Loop', desc: 'Overnight test suites, report in AM' },
-                ].map(({ time, job, desc }, i, arr) => (
-                  <div key={job} className={`flex items-start gap-4 py-4 ${i < arr.length - 1 ? 'border-b border-[#DCE4EA]' : ''}`}>
-                    <div className="min-w-[80px] text-[12px] font-mono font-bold text-[#FF9922]">{time}</div>
-                    <div>
-                      <div className="text-[14px] font-semibold text-[#3F454D]">{job}</div>
-                      <div className="text-[12px] text-[#68737F] mt-0.5">{desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <h3 className="font-bold text-[#3F454D] text-[17px] mb-5">Reaction Commands</h3>
-              <div className="bg-[#F1F6FA] rounded-[12px] border border-[#DCE4EA] p-6">
-                {[
-                  { emoji: '❤️', action: 'Heart', result: 'Save to memory' },
-                  { emoji: '👍', action: 'Thumbs up', result: 'Approve & execute task' },
-                  { emoji: '👎', action: 'Thumbs down', result: 'Cancel queued task' },
-                  { emoji: '❓', action: 'Question', result: 'Get more detail' },
-                  { emoji: '❗', action: 'Exclamation', result: 'Run immediately' },
-                ].map(({ emoji, action, result }) => (
-                  <div key={action} className="flex items-center gap-4 py-2.5 text-[13px]">
-                    <span className="text-xl w-7 text-center">{emoji}</span>
-                    <span className="text-[#3F454D] font-semibold w-24">{action}</span>
-                    <span className="text-[#68737F]">{result}</span>
-                  </div>
-                ))}
+      {/* ───── HEARTBEAT ───── */}
+      <Section id="heartbeat" bg="white">
+        <SectionHeader title="Proactive, Not Just Reactive" subtitle="Your agent monitors your infrastructure and texts YOU when something needs attention." />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, maxWidth: 960, margin: '0 auto', alignItems: 'start' }}>
+          <div>
+            <img src="./images/heartbeat.png" alt="Heartbeat" style={{ width: '100%', borderRadius: 12, border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', marginBottom: 24 }} />
+            <div className="domo-card" style={{ padding: '1.5rem' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--neutral-200)', textAlign: 'center', marginBottom: 16 }}>MORNING BRIEFING — 7:00 AM</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <IMessageBubble text={"Morning check-in:\n— All services healthy\n— 3 commits pushed yesterday\n— Weekly exec report ran successfully\n— 1 pending task: \"build Linq app\"\nHave a great Tuesday."} isMe={false} />
+                <IMessageBubble text="run the pending task" isMe={true} />
+                <IMessageBubble text="On it. Starting build now..." isMe={false} />
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Comparison */}
-      <section id="comparison" className="py-24 px-6 bg-[#F1F6FA]">
-        <div className="max-w-[960px] mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold text-[#3F454D] mb-4">Why Not Just Use OpenClaw?</h2>
-            <p className="text-[#68737F] max-w-[520px] mx-auto">
-              Claude Code already has everything OpenClaw offers — and more. No third-party risk. Anthropic-maintained.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto bg-white rounded-[12px] border border-[#DCE4EA] shadow-[0_1px_3px_rgba(63,69,77,0.08)]">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b-2 border-[#DCE4EA]">
-                  <th className="py-4 px-5 text-left font-bold text-[#3F454D]">Feature</th>
-                  <th className="py-4 px-5 text-left font-bold text-[#B7C1CB]">OpenClaw</th>
-                  <th className="py-4 px-5 text-left font-bold text-[#99CCEE]">Our Build</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { f: 'AI Engine', o: 'Claude API (raw)', u: 'Claude Code CLI (full toolchain)', h: true },
-                  { f: 'File Access', o: 'Basic file tools', u: 'Full filesystem + MCP servers', h: false },
-                  { f: 'Memory', o: 'Markdown + vector search', u: 'Typed categories + auto-loading', h: true },
-                  { f: 'Skills', o: '5,400+ community', u: '40+ production-tested', h: false },
-                  { f: 'Heartbeat', o: '30min check-in cycle', u: 'Customizable launchd cron', h: true },
-                  { f: 'Multi-Agent', o: 'Gateway routing', u: 'Multiple Linq lines + working dirs', h: false },
-                  { f: 'Browser', o: 'CDP automation', u: 'Playwright MCP', h: true },
-                  { f: 'Security', o: 'Skill exfiltration risk', u: 'HMAC + phone allowlist + tunnel', h: false },
-                  { f: 'Maintainer', o: 'Creator left for OpenAI', u: 'Anthropic (Claude Code)', h: true },
-                  { f: 'Domo Access', o: 'None', u: 'Native MCP (datasets, cards, workflows)', h: false },
-                ].map(({ f, o, u, h }) => (
-                  <tr key={f} className={h ? 'bg-[#F1F6FA]' : ''}>
-                    <td className="py-3.5 px-5 font-semibold text-[#3F454D] border-b border-[#F1F6FA]">{f}</td>
-                    <td className="py-3.5 px-5 text-[#B7C1CB] border-b border-[#F1F6FA]">{o}</td>
-                    <td className="py-3.5 px-5 text-[#3F454D] font-medium border-b border-[#F1F6FA]">{u}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* Security */}
-      <section className="py-24 px-6 bg-white">
-        <div className="max-w-[960px] mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold text-[#3F454D] mb-4">Security Model</h2>
-            <p className="text-[#68737F]">Six layers of protection so autonomous mode isn't actually dangerous.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              { icon: '🔐', title: 'HMAC Signature Verification', desc: 'Every webhook is cryptographically signed. Only Linq can trigger your server.' },
-              { icon: '📱', title: 'Phone Number Allowlist', desc: 'Only your phone number is processed. Everyone else is silently ignored.' },
-              { icon: '🔒', title: 'Cloudflared Tunnel', desc: 'Encrypted tunnel, no open ports on your machine. Zero attack surface.' },
-              { icon: '🔄', title: 'Max Turns Limit', desc: 'Capped at 25 turns to prevent runaway loops. Timeout at 3 minutes.' },
-              { icon: '📂', title: 'Working Directory Scope', desc: 'Scoped to ~/ai_projects/. CLAUDE.md conventions and hooks still apply.' },
-              { icon: '🌿', title: 'Git Branch Isolation', desc: 'Auto-creates branches for changes. Never commits directly to main.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="bg-[#F1F6FA] rounded-[12px] p-6 border border-[#DCE4EA]">
-                <div className="text-2xl mb-3">{icon}</div>
-                <h3 className="font-bold text-[#3F454D] text-[14px] mb-2">{title}</h3>
-                <p className="text-[12px] text-[#68737F] leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stack + Cost */}
-      <section className="py-24 px-6 bg-[#F1F6FA]">
-        <div className="max-w-[960px] mx-auto">
-          <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold text-[#3F454D] text-center mb-12">The Stack</h2>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-white rounded-[12px] p-7 border border-[#DCE4EA] shadow-[0_1px_3px_rgba(63,69,77,0.08)]">
-              <h3 className="font-bold text-[#99CCEE] text-[15px] mb-5">Infrastructure</h3>
-              <div className="space-y-4 text-[13px]">
-                {[
-                  ['Linq Partner API', 'iMessage at scale'],
-                  ['Cloudflared Tunnel', 'Encrypted tunnel (free)'],
-                  ['Flask Server', 'Webhook handler'],
-                  ['launchd', 'Auto-start on boot'],
-                  ['Mac Mini', '24/7 build machine'],
-                ].map(([name, desc]) => (
-                  <div key={name} className="flex justify-between items-center">
-                    <span className="font-semibold text-[#3F454D]">{name}</span>
-                    <span className="text-[#B7C1CB] text-[12px]">{desc}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bg-white rounded-[12px] p-7 border border-[#DCE4EA] shadow-[0_1px_3px_rgba(63,69,77,0.08)]">
-              <h3 className="font-bold text-[#FF9922] text-[15px] mb-5">Claude Code Tools</h3>
-              <div className="space-y-4 text-[13px]">
-                {[
-                  ['Domo MCP', 'Datasets, cards, workflows'],
-                  ['Neo4j KG', 'Product & competitive intel'],
-                  ['Playwright', 'Browser automation'],
-                  ['Figma MCP', 'Design system'],
-                  ['40+ Skills', 'Health, deploys, content intel'],
-                ].map(([name, desc]) => (
-                  <div key={name} className="flex justify-between items-center">
-                    <span className="font-semibold text-[#3F454D]">{name}</span>
-                    <span className="text-[#B7C1CB] text-[12px]">{desc}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-[12px] p-7 border border-[#DCE4EA] shadow-[0_1px_3px_rgba(63,69,77,0.08)]">
-            <h3 className="font-bold text-[#3F454D] text-[15px] text-center mb-6">Monthly Cost</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div>
+            <h4 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 17, marginBottom: 20 }}>Scheduled Behaviors</h4>
+            <div className="domo-card" style={{ marginBottom: 28 }}>
               {[
-                { item: 'Cloudflare', cost: 'Free', color: '#ADD4C1' },
-                { item: 'Claude Code', cost: 'Existing sub', color: '#99CCEE' },
-                { item: 'Mac Mini', cost: '~$5 electric', color: '#99CCEE' },
-                { item: 'Linq', cost: 'TBD', color: '#FF9922' },
-              ].map(({ item, cost, color }) => (
-                <div key={item}>
-                  <div className="text-[11px] text-[#B7C1CB] font-semibold mb-1 uppercase tracking-wider">{item}</div>
-                  <div className="text-[20px] font-bold" style={{ color }}>{cost}</div>
+                { time: '7:00 AM', job: 'Morning Briefing', desc: 'Overnight alerts, git activity, priorities' },
+                { time: 'Every 30m', job: 'Health Heartbeat', desc: 'Check services. Alert only if issues.' },
+                { time: '6:00 PM', job: 'EOD Summary', desc: 'Commits, deploys, issues resolved' },
+                { time: 'Fri 4 PM', job: 'Weekly Digest', desc: 'Week highlights, deploys, KG changes' },
+                { time: 'Midnight', job: 'Ralph Loop', desc: 'Overnight test suites, report in AM' },
+              ].map(({ time, job, desc }, i, arr) => (
+                <div key={job} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '14px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--neutral-100)' : 'none' }}>
+                  <div style={{ minWidth: 72, fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: 'var(--accent-orange)' }}>{time}</div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--neutral-900)' }}>{job}</div>
+                    <div style={{ fontSize: 12, color: 'var(--neutral-600)', marginTop: 2 }}>{desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <h4 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 17, marginBottom: 20 }}>Reaction Commands</h4>
+            <div className="domo-card">
+              {[
+                { emoji: '❤️', action: 'Heart', result: 'Save to memory' },
+                { emoji: '👍', action: 'Thumbs up', result: 'Approve & execute task' },
+                { emoji: '👎', action: 'Thumbs down', result: 'Cancel queued task' },
+                { emoji: '❓', action: 'Question', result: 'Get more detail' },
+                { emoji: '❗', action: 'Exclamation', result: 'Run immediately' },
+              ].map(({ emoji, action, result }) => (
+                <div key={action} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 0', fontSize: 13 }}>
+                  <span style={{ fontSize: 20, width: 28, textAlign: 'center' }}>{emoji}</span>
+                  <span style={{ fontWeight: 600, color: 'var(--neutral-900)', width: 96 }}>{action}</span>
+                  <span style={{ color: 'var(--neutral-600)' }}>{result}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* Footer */}
-      <footer className="py-8 px-6 bg-white border-t border-[#DCE4EA]">
-        <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-[13px] text-[#B7C1CB]">Built by Jake Heaps — Domo Marketing/Growth</div>
-          <div className="flex gap-6 text-[12px] text-[#B7C1CB]">
+      {/* ───── VS OPENCLAW ───── */}
+      <Section id="openclaw" bg="light">
+        <SectionHeader title="Why Not Just Use OpenClaw?" subtitle="Claude Code already has everything OpenClaw offers — and more. No third-party risk. Anthropic-maintained." />
+        <div className="domo-card" style={{ maxWidth: 960, margin: '0 auto', padding: 0, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--neutral-100)' }}>
+                <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 700, color: 'var(--neutral-900)' }}>Feature</th>
+                <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 700, color: 'var(--neutral-200)' }}>OpenClaw</th>
+                <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 700, color: 'var(--domo-blue)' }}>Our Build</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { f: 'AI Engine', o: 'Claude API (raw)', u: 'Claude Code CLI (full toolchain)', h: true },
+                { f: 'File Access', o: 'Basic file tools', u: 'Full filesystem + MCP servers', h: false },
+                { f: 'Memory', o: 'Markdown + vector search', u: 'Typed categories + auto-loading', h: true },
+                { f: 'Skills', o: '5,400+ community', u: '40+ production-tested', h: false },
+                { f: 'Heartbeat', o: '30min check-in', u: 'Customizable launchd cron', h: true },
+                { f: 'Multi-Agent', o: 'Gateway routing', u: 'Multiple Linq lines + dirs', h: false },
+                { f: 'Security', o: 'Skill exfiltration risk', u: 'HMAC + allowlist + tunnel', h: true },
+                { f: 'Maintainer', o: 'Creator left for OpenAI', u: 'Anthropic (Claude Code)', h: false },
+                { f: 'Domo Access', o: 'None', u: 'Native MCP (datasets, cards)', h: true },
+              ].map(({ f, o, u, h }) => (
+                <tr key={f} style={{ background: h ? 'var(--neutral-50)' : '#fff' }}>
+                  <td style={{ padding: '12px 20px', fontWeight: 600, color: 'var(--neutral-900)', borderBottom: '1px solid var(--neutral-50)' }}>{f}</td>
+                  <td style={{ padding: '12px 20px', color: 'var(--neutral-200)', borderBottom: '1px solid var(--neutral-50)' }}>{o}</td>
+                  <td style={{ padding: '12px 20px', color: 'var(--neutral-900)', fontWeight: 500, borderBottom: '1px solid var(--neutral-50)' }}>{u}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Section>
+
+      {/* ───── SECURITY ───── */}
+      <Section bg="white">
+        <SectionHeader title="Security Model" subtitle="Six layers of protection so autonomous mode isn't actually dangerous." />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, maxWidth: 800, margin: '0 auto' }}>
+          {[
+            { icon: '🔐', title: 'HMAC Signature Verification', desc: 'Every webhook is cryptographically signed. Only Linq can trigger your server.' },
+            { icon: '📱', title: 'Phone Number Allowlist', desc: 'Only your phone number is processed. Everyone else is silently ignored.' },
+            { icon: '🔒', title: 'Cloudflared Tunnel', desc: 'Encrypted tunnel, no open ports on your machine. Zero attack surface.' },
+            { icon: '🔄', title: 'Max Turns Limit', desc: 'Capped at 25 turns to prevent runaway loops. Timeout at 3 minutes.' },
+            { icon: '📂', title: 'Working Directory Scope', desc: 'Scoped to ~/ai_projects/. CLAUDE.md conventions and hooks still apply.' },
+            { icon: '🌿', title: 'Git Branch Isolation', desc: 'Auto-creates branches for changes. Never commits directly to main.' },
+          ].map(({ icon, title, desc }, idx) => {
+            const ref = useScrollAnimate()
+            return (
+              <div ref={ref} key={title} className={`domo-card domo-delay-${idx + 1}`}>
+                <div style={{ fontSize: 24, marginBottom: 10 }}>{icon}</div>
+                <h4 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 14, marginBottom: 6 }}>{title}</h4>
+                <p style={{ fontSize: 12, color: 'var(--neutral-600)', lineHeight: 1.65 }}>{desc}</p>
+              </div>
+            )
+          })}
+        </div>
+      </Section>
+
+      {/* ───── STACK + COST ───── */}
+      <Section bg="light">
+        <SectionHeader title="The Stack" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, maxWidth: 800, margin: '0 auto 24px' }}>
+          <div className="domo-card">
+            <h4 style={{ fontWeight: 700, color: 'var(--domo-blue)', fontSize: 15, marginBottom: 20 }}>Infrastructure</h4>
+            {['Linq Partner API → iMessage at scale', 'Cloudflared Tunnel → Encrypted (free)', 'Flask Server → Webhook handler', 'launchd → Auto-start on boot', 'Mac Mini → 24/7 build machine'].map(item => {
+              const [name, desc] = item.split(' → ')
+              return (
+                <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--neutral-50)' }}>
+                  <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--neutral-900)' }}>{name}</span>
+                  <span style={{ fontSize: 12, color: 'var(--neutral-200)' }}>{desc}</span>
+                </div>
+              )
+            })}
+          </div>
+          <div className="domo-card">
+            <h4 style={{ fontWeight: 700, color: 'var(--accent-orange)', fontSize: 15, marginBottom: 20 }}>Claude Code Tools</h4>
+            {['Domo MCP → Datasets, cards, workflows', 'Neo4j KG → Product & competitive intel', 'Playwright → Browser automation', 'Figma MCP → Design system', '40+ Skills → Health, deploys, content intel'].map(item => {
+              const [name, desc] = item.split(' → ')
+              return (
+                <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--neutral-50)' }}>
+                  <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--neutral-900)' }}>{name}</span>
+                  <span style={{ fontSize: 12, color: 'var(--neutral-200)' }}>{desc}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+        <div className="domo-card" style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
+          <h4 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 15, marginBottom: 24 }}>Monthly Cost</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            {[
+              { item: 'CLOUDFLARE', cost: 'Free', color: 'var(--accent-mint)' },
+              { item: 'CLAUDE CODE', cost: 'Existing sub', color: 'var(--domo-blue)' },
+              { item: 'MAC MINI', cost: '~$5 electric', color: 'var(--domo-blue)' },
+              { item: 'LINQ', cost: 'TBD', color: 'var(--accent-orange)' },
+            ].map(({ item, cost, color }) => (
+              <div key={item}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--neutral-200)', marginBottom: 6 }}>{item}</div>
+                <div style={{ fontSize: 22, fontWeight: 300, color }}>{cost}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ───── FOOTER (Dark) ───── */}
+      <footer style={{ background: 'var(--neutral-900)', padding: '2.5rem 1.5rem' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ fontSize: 13, color: 'var(--neutral-200)' }}>Built by Jake Heaps — Domo Marketing/Growth</div>
+          <div style={{ display: 'flex', gap: 24, fontSize: 12, color: 'var(--neutral-200)' }}>
             <span>Powered by Claude Code + Linq API</span>
             <span>March 2026</span>
           </div>
