@@ -476,6 +476,25 @@ function App() {
         </div>
       </Section>
 
+      {/* ───── DOWNLOAD PLAN ───── */}
+      <Section bg="white">
+        <div style={{ textAlign: 'center', maxWidth: 600, margin: '0 auto' }}>
+          <h2 style={{ color: 'var(--neutral-900)', marginBottom: 12 }}>Get the Full Plan</h2>
+          <p style={{ color: 'var(--neutral-600)', marginBottom: 28, lineHeight: 1.7 }}>
+            The complete implementation plan — architecture, security model, code samples,
+            heartbeat system, OpenClaw comparison, and step-by-step build instructions.
+          </p>
+          <a
+            href="./iMessage-Claude-Code-Agent-Plan.md"
+            download
+            className="domo-btn-primary"
+            style={{ fontSize: 16, padding: '1rem 2.5rem' }}
+          >
+            Download Full Plan (.md)
+          </a>
+        </div>
+      </Section>
+
       {/* ───── FOOTER (Dark) ───── */}
       <footer style={{ background: 'var(--neutral-900)', padding: '2.5rem 1.5rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
