@@ -284,27 +284,148 @@ function App() {
         </div>
       </Section>
 
-      {/* ───── SECURITY ───── */}
-      <Section bg="white">
-        <SectionHeader title="Security Model" subtitle="Six layers of protection so autonomous mode isn't actually dangerous." />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, maxWidth: 800, margin: '0 auto' }}>
-          {[
-            { icon: '🔐', title: 'HMAC Signature Verification', desc: 'Every webhook is cryptographically signed. Only Linq can trigger your server.' },
-            { icon: '📱', title: 'Phone Number Allowlist', desc: 'Only your phone number is processed. Everyone else is silently ignored.' },
-            { icon: '🔒', title: 'Cloudflared Tunnel', desc: 'Encrypted tunnel, no open ports on your machine. Zero attack surface.' },
-            { icon: '🔄', title: 'Max Turns Limit', desc: 'Capped at 25 turns to prevent runaway loops. Timeout at 3 minutes.' },
-            { icon: '📂', title: 'Working Directory Scope', desc: 'Scoped to ~/ai_projects/. CLAUDE.md conventions and hooks still apply.' },
-            { icon: '🌿', title: 'Git Branch Isolation', desc: 'Auto-creates branches for changes. Never commits directly to main.' },
-          ].map(({ icon, title, desc }, idx) => {
-            const ref = useScrollAnimate()
-            return (
-              <div ref={ref} key={title} className={`domo-card domo-delay-${idx + 1}`}>
-                <div style={{ fontSize: 24, marginBottom: 10 }}>{icon}</div>
-                <h4 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 14, marginBottom: 6 }}>{title}</h4>
-                <p style={{ fontSize: 12, color: 'var(--neutral-600)', lineHeight: 1.65 }}>{desc}</p>
+      {/* ───── SECURITY — COMPREHENSIVE ───── */}
+      <Section id="security" bg="white">
+        <SectionHeader title="Enterprise Security Model" subtitle="Autonomous mode with layered protections — access control, prompt injection defense, secrets management, and audit logging." />
+
+        {/* Access Control */}
+        <div style={{ maxWidth: 900, margin: '0 auto 40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--domo-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🔐</div>
+            <h3 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 18 }}>Access Control</h3>
+          </div>
+          <div className="domo-card" style={{ padding: 0, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--neutral-100)' }}>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontWeight: 700, color: 'var(--neutral-900)' }}>Control</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontWeight: 700, color: 'var(--neutral-600)' }}>How It Works</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { c: 'Phone Number Allowlist', d: 'Server rejects any sender not in the approved list. Silent rejection — no error reveals the agent exists.' },
+                  { c: 'Group Chat Rejection', d: 'Agent ignores all group messages. Only responds in 1:1 DMs with authorized users.' },
+                  { c: 'HMAC Signature Verification', d: 'Every webhook is cryptographically signed with HMAC-SHA256. Replay protection rejects messages older than 5 minutes.' },
+                  { c: 'Number Secrecy', d: 'The Linq phone number is never published. No QR codes or public "text us" links. Shared only via direct, secure channels.' },
+                  { c: 'Permission Tiers', d: 'Different users get different access levels: autonomous (full), plan-only (proposes before executing), or read-only (queries only).' },
+                  { c: 'MDM/Intune Ready', d: 'For team scaling: device management policies can restrict which managed devices have access to the agent number.' },
+                ].map(({ c, d }, i) => (
+                  <tr key={c} style={{ background: i % 2 ? '#fff' : 'var(--neutral-50)' }}>
+                    <td style={{ padding: '12px 20px', fontWeight: 600, color: 'var(--neutral-900)', borderBottom: '1px solid var(--neutral-50)', whiteSpace: 'nowrap' }}>{c}</td>
+                    <td style={{ padding: '12px 20px', color: 'var(--neutral-600)', borderBottom: '1px solid var(--neutral-50)' }}>{d}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Prompt Injection Defense */}
+        <div style={{ maxWidth: 900, margin: '0 auto 40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--accent-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🛡️</div>
+            <h3 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 18 }}>Prompt Injection Defense</h3>
+          </div>
+          <p style={{ color: 'var(--neutral-600)', marginBottom: 20, fontSize: 14, lineHeight: 1.7 }}>
+            Prompt injection is OWASP's #1 LLM vulnerability. Since this agent accepts raw text and runs Claude Code with autonomous permissions, five defense layers are applied:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
+            {[
+              { n: '1', title: 'Access Gate', desc: 'Phone allowlist blocks all untrusted senders before any processing' },
+              { n: '2', title: 'Prompt Hardening', desc: 'System prompt explicitly rejects injection patterns and overrides' },
+              { n: '3', title: 'Output Filtering', desc: 'Regex-based redaction strips API keys, tokens, and secrets from responses' },
+              { n: '4', title: 'Input Scanning', desc: 'Blocklist detects common injection phrases before running Claude' },
+              { n: '5', title: 'Least Privilege', desc: 'Scoped working directory, restricted outbound, approved services only' },
+            ].map(({ n, title, desc }) => {
+              const ref = useScrollAnimate()
+              return (
+                <div ref={ref} key={n} className={`domo-card domo-delay-${n}`} style={{ textAlign: 'center', padding: '1.25rem' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent-orange)', color: '#fff', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>{n}</div>
+                  <h4 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 12, marginBottom: 6 }}>{title}</h4>
+                  <p style={{ fontSize: 11, color: 'var(--neutral-600)', lineHeight: 1.5 }}>{desc}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Secrets Management */}
+        <div style={{ maxWidth: 900, margin: '0 auto 40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--neutral-900)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🔑</div>
+            <h3 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 18 }}>Secrets Management</h3>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div className="domo-card">
+              <h4 style={{ fontWeight: 700, color: 'var(--domo-blue)', fontSize: 14, marginBottom: 12 }}>Server-Side Secrets</h4>
+              <p style={{ fontSize: 12, color: 'var(--neutral-600)', lineHeight: 1.7, marginBottom: 12 }}>
+                Linq API token and signing secret are used exclusively by the Flask server. They are <strong>never passed</strong> to the Claude Code subprocess.
+              </p>
+              <div style={{ background: 'var(--neutral-50)', borderRadius: 6, padding: 12, fontSize: 11, fontFamily: 'monospace', color: 'var(--neutral-600)' }}>
+                LINQ_TOKEN → Flask only<br />
+                SIGNING_SECRET → Flask only<br />
+                ALLOWED_PHONES → Flask only
               </div>
-            )
-          })}
+            </div>
+            <div className="domo-card">
+              <h4 style={{ fontWeight: 700, color: 'var(--accent-orange)', fontSize: 14, marginBottom: 12 }}>Output Sanitization</h4>
+              <p style={{ fontSize: 12, color: 'var(--neutral-600)', lineHeight: 1.7, marginBottom: 12 }}>
+                Before any response is sent via iMessage, it passes through regex-based redaction that strips API keys, tokens, bearer credentials, and env var values.
+              </p>
+              <div style={{ background: 'var(--neutral-50)', borderRadius: 6, padding: 12, fontSize: 11, fontFamily: 'monospace', color: 'var(--neutral-600)' }}>
+                sk-ant-**** → [REDACTED]<br />
+                AIza**** → [REDACTED]<br />
+                ghp_**** → [REDACTED]
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Exfiltration + Audit */}
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--domo-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🚫</div>
+                <h3 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 16 }}>Exfiltration Protection</h3>
+              </div>
+              <div className="domo-card">
+                {[
+                  'System prompt prohibits sending credentials in responses',
+                  'Working directory scoped — no access to ~/.ssh or ~/.aws',
+                  'Outbound restricted to approved services only',
+                  'Git operations restricted to authorized repos',
+                  'Optional Docker containerization for hardened isolation',
+                ].map(item => (
+                  <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--neutral-50)' }}>
+                    <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontSize: 14, marginTop: 1 }}>&#10003;</span>
+                    <span style={{ fontSize: 12, color: 'var(--neutral-600)', lineHeight: 1.6 }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--neutral-900)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>📋</div>
+                <h3 style={{ fontWeight: 700, color: 'var(--neutral-900)', fontSize: 16 }}>Audit & Monitoring</h3>
+              </div>
+              <div className="domo-card">
+                {[
+                  'Every request logged: sender, timestamp, execution time',
+                  'Unauthorized access attempts tracked separately',
+                  'Full Claude Code output captured per request',
+                  'Anomaly alerting: 5+ rejected senders or 20+ requests triggers alert',
+                  'Configurable message retention policy (auto-delete)',
+                ].map(item => (
+                  <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--neutral-50)' }}>
+                    <span style={{ color: 'var(--domo-blue)', fontWeight: 700, fontSize: 14, marginTop: 1 }}>&#10003;</span>
+                    <span style={{ fontSize: 12, color: 'var(--neutral-600)', lineHeight: 1.6 }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </Section>
 
